@@ -1,0 +1,45 @@
+.log : log.Println
+    ANY  →  log.Println(`$expr$: `, $expr$)$END$
+.logf : log.Printf
+    ANY  →  log.Printf(`$expr$: %+v`, $expr$)$END$
+.logJson : json ob log
+    ANY → s, _ := json.MarshalIndent($expr$, "", "\t")\
+        log.Printf(`$expr$: %+v`, string(s))$END$\
+
+.logJson : json ob log
+    ANY → s, _ := json.MarshalIndent($expr$, "", "\t")\
+        log.Printf(`$expr$: %+v`, string(s))$END$\
+
+.logJsonToFile : json ob log
+    ANY → s, _ := json.MarshalIndent($expr$, "", "\t")\
+        log.Printf(`$expr$: %+v`, string(s))\
+        f, _ := os.OpenFile("log.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)\
+        f.WriteString(string(s))$END$
+
+.cast : type($e)
+    ANY  →  $var0$($expr$)$END$
+.castF : .(type)
+    ANY  →  ($expr$).($var0$)$END$
+.castok : var, ok :=
+    ANY  →  $var0$, ok := ($expr$).($var1$)\
+			if !ok {\
+				$END$\
+			}
+.include : [].include
+    ARRAY  →  include := func() bool {\
+				for i := range a {\
+					if a[i] == 1 {\
+						return true\
+					}\
+				}\
+				return false\
+			}$END$
+.insert : [].insert
+    ARRAY  → $expr$ = append($expr$[:$var0$+1], $expr$[$var0$:]...)\
+				$expr$[$var0$] = $var1$\
+			$END$
+.stack : WithStack(error)
+    ERROR → errors.WithStack($expr$)
+.round : math.Round(float64)
+    FLOAT64 → math.Round($expr$)
+
